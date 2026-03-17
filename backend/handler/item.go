@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"love-check/model"
 	"love-check/repository"
@@ -19,6 +20,22 @@ func NewItemHandler(repo *repository.ItemRepository) *ItemHandler {
 }
 
 func (h *ItemHandler) GetItems(c *gin.Context) {
+	dateStr := c.Query("date")
+	if dateStr != "" {
+		date, err := time.Parse("2006-01-02", dateStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "无效日期格式"})
+			return
+		}
+		items, err := h.repo.GetByDate(date)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "查询失败"})
+			return
+		}
+		c.JSON(http.StatusOK, items)
+		return
+	}
+
 	items, err := h.repo.GetAll()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "查询失败"})
@@ -34,7 +51,15 @@ func (h *ItemHandler) AddItem(c *gin.Context) {
 		return
 	}
 
-	item, err := h.repo.Create(req.Content)
+	var itemDate *time.Time
+	if req.ItemDate != nil {
+		t, err := time.Parse("2006-01-02", *req.ItemDate)
+		if err == nil {
+			itemDate = &t
+		}
+	}
+
+	item, err := h.repo.Create(req.Content, itemDate)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "添加失败"})
 		return
@@ -55,7 +80,15 @@ func (h *ItemHandler) ToggleItem(c *gin.Context) {
 		return
 	}
 
-	item, err := h.repo.Update(id, req.Completed)
+	var itemDate *time.Time
+	if req.ItemDate != nil {
+		t, err := time.Parse("2006-01-02", *req.ItemDate)
+		if err == nil {
+			itemDate = &t
+		}
+	}
+
+	item, err := h.repo.Update(id, req.Completed, itemDate)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "未找到"})
 		return

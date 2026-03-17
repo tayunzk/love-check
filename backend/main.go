@@ -59,9 +59,16 @@ func initDB(cfg *config.Config) *sql.DB {
 			id INT AUTO_INCREMENT PRIMARY KEY,
 			content VARCHAR(255) NOT NULL,
 			completed BOOLEAN DEFAULT FALSE,
+			item_date DATE DEFAULT (DATE(created_at)),
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		)
 	`)
+
+	var colCount int
+	db.QueryRow("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'items' AND COLUMN_NAME = 'item_date'").Scan(&colCount)
+	if colCount == 0 {
+		db.Exec("ALTER TABLE items ADD COLUMN item_date DATE DEFAULT (DATE(created_at))")
+	}
 
 	log.Println("数据库初始化成功")
 	return db
