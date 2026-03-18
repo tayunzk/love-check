@@ -87,13 +87,18 @@ function renderItems() {
         li.style.animationDelay = `${index * 0.05}s`;
         li.dataset.id = item.id;
 
-        const dateStr = item.item_date ? formatDate(item.item_date) : formatDate(item.created_at);
+        const hasItemDate = !!item.item_date;
+        const dateStr = hasItemDate ? formatDate(item.item_date) : formatDate(item.created_at);
+        const dateLabel = hasItemDate ? '计划日期' : '创建时间';
 
         li.innerHTML = `
             <div class="checkbox" onclick="toggleItem(${item.id})"></div>
             <div class="item-content">
                 <span class="content">${escapeHtml(item.content)}</span>
-                <span class="time">${dateStr}</span>
+                <div class="time-row">
+                    <span class="time-label">${dateLabel}</span>
+                    <span class="time">${dateStr}</span>
+                </div>
             </div>
             <button class="delete-btn" onclick="deleteItem(${item.id})" title="删除">×</button>
         `;

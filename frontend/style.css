@@ -409,10 +409,24 @@ header::before {
     line-height: 1.5;
 }
 
+.time-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.time-label {
+    font-size: 11px;
+    color: var(--primary);
+    background: var(--primary-soft);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
 .time {
     font-size: 12px;
     color: var(--text-muted);
-    opacity: 0.7;
 }
 
 .item-list li.completed .content {
